@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <link id="pagestyle" href="assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+  </button>  
+
+  <div class="sidebar">
+    <button class="close-btn" onclick="closeSidebar()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div>
+      <div class="logo">
+        <img src="assets/img/telkom.png" alt="Logo iSCYS" />
+      </div>
+      <a href="dashboard.html" class="nav-links">
+        <i class="fa-solid fa-house"></i> Home</a>
+      <a href="log_aktivitas.html" class="nav-links">
+        <i class="fa-solid fa-clock"></i> Log Aktivitas</a>
+      <a href="inventory.html" class="nav-links">
+        <i class="fa-solid fa-box"></i> Inventory barang</a>
+      <a href="persuratan.html" class="nav-links">
+        <i class="fa-solid fa-envelope"></i> Persuratan</a>
+        <!--
+      <a href="buku_tamu.html" class="nav-links">
+        <i class="fa-solid fa-book"></i> Buku tamu</a>
+      <a href="peminjaman.html" class="nav-links">
+        <i class="fa-solid fa-door-open"></i> Peminjaman Ruangan</a>
+        -->
+    </div>
+    <div>
+      <a href="profile.html" class="nav-links"
+        ><i class="fa-solid fa-user"></i> My Profile</a
+      >
+      <a href="#" id="logoutLink" class="nav-links">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </a>      
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div class="profile-section">
+        <h2>Halo, <span id="userName">User</span>!</h2>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="cardy darkblue">
+        <h4>Aktivitas Hari ini</h4>
+        <p id="totalLogHariIni" style="font-size: 60px;">0</p>
+      </div>
+      <div class="cardy blue">
+        <h4>Jumlah insiden</h4>
+        <p id="totalInsiden" style="font-size: 60px;">0</p>
+      </div>
+      <div class="cardy purple">
+        <h4>Jumlah Aktivitas Rutin</h4>
+        <p id="totalRutin" style="font-size: 60px;">0</p>
+      </div>
+      <div class="cardy yellow">
+        <h4>Jumlah Follow-Up</h4>
+        <p id="totalFollowup" style="font-size: 60px;">0</p>
+      </div>
+    </div>
+    <div class="bottom-section">
+      <div class="galeri" style="flex: 2; text-align: center;">
+        <h2 style="margin-bottom: 10px;">Grafik Log Aktivitas</h2>
+        <div class="chart-container" style="width: 100%; max-width: 600px; margin: 30px auto;">
+          <canvas id="dashboardChart"></canvas>
+        </div>        
+      </div>
+      <div class="kalender" style="flex: 1; text-align: center;">
+        <h3 style="margin-bottom: 10px;">Kalender</h3>
+        <div id="monthName" style="font-size: 24px; font-weight: bold; margin-bottom: 8px;"></div> <!-- tempat nama bulan -->
+        <div id="calendar">
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

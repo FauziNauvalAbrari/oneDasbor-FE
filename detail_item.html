@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detail Log Aktivitas</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+  <link id="pagestyle" href="assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
+  <style>
+
+  </style>
+</head>
+<body>
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+  </button>  
+
+  <div class="sidebar">
+    <button class="close-btn" onclick="closeSidebar()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div>
+      <div class="logo"><img src="assets/img/telkom.png" alt="Logo iSCYS" /></div>
+      <a href="dashboard.html" class="nav-links"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="log_aktivitas.html" class="nav-links"><i class="fa-solid fa-clock"></i> Log Aktivitas</a>
+      <a href="inventory.html" class="nav-links"><i class="fa-solid fa-box"></i> Inventory barang</a>
+      <a href="persuratan.html" class="nav-links"><i class="fa-solid fa-envelope"></i> Persuratan</a>
+      <!--
+      <a href="buku_tamu.html" class="nav-links">
+        <i class="fa-solid fa-book"></i> Buku tamu</a>
+      <a href="peminjaman.html" class="nav-links">
+        <i class="fa-solid fa-door-open"></i> Peminjaman Ruangan</a>
+        -->
+    </div>
+    <div>
+      <a href="profile.html" class="nav-links"><i class="fa-solid fa-user"></i> My Profile</a>
+      <a href="#" id="logoutLink" class="nav-links"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </div>
+  </div>
+
+  <div class="main"><div class="header">
+    <div class="profile-section">
+      <h2 style="margin-bottom: -20px;">Detail Data Barang</h2>
+    </div>
+  </div>
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4 card-header rounded">
+            <div class="card-body px-4 pt-0 pb-4">
+              <div class="item-detail-container">
+                <div id="foto_barang_container" class="d-flex flex-wrap mb-3">      
+                    
+                </div>
+                <div class="row">
+                  <div class="col-md-6"><hidden>
+                    <p style="display: none;"><span id="user_created"></span></p></hidden>
+                    <p><strong>Kode Barang:</strong> <span id="kode_barang"></span></p>
+                    <p><strong>Serial Number:</strong> <span id="serial_number"></span></p>
+                    <p><strong>Nama Barang:</strong> <span id="nama_barang"></span></p>
+                    <p><strong>Stok Barang:</strong> <span id="stok"></span></p>
+                    <p><strong>Tanggal Masuk:</strong> <span id="tanggal_masuk"></span></p>
+                    <p><strong>Tanggal Terpakai:</strong> <span id="tanggal_terpakai"></span></p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Pemilik:</strong> <span id="pemilik"></span></p> 
+                    <p><strong>Lokasi:</strong> <span id="lokasi"></span></p> 
+                    <p><strong>Status:</strong> <span id="status"></span></p>  
+                    <p><strong>Laporan dibuat:</strong> <span id="created_at"></span></p>
+                    <p><strong>Update Terakhir:</strong> <span id="updated_at"></span></p>
+                  </div>
+                </div>
+                <button class="btn btn-gradient-info btn-kembali mt-3" onclick="goBack()">← Kembali</button>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/detail_item.js"></script>
+</body>
+</html>

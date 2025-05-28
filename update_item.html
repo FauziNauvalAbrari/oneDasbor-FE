@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Barang Inventaris</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+  <link id="pagestyle" href="assets/css/soft-ui-dashboard.css?v=1.1.0" rel="stylesheet" />
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
+  <style>
+    /* Styling for current photos preview */
+    #currentFoto img {
+      max-width: 100px;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="sidebar">
+    <button class="close-btn" onclick="closeSidebar()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div>
+      <div class="logo">
+        <img src="assets/img/telkom.png" alt="Logo iSCYS" />
+      </div>
+      <a href="dashboard.html" class="nav-links">
+        <i class="fa-solid fa-house"></i> Home</a>
+      <a href="log_aktivitas.html" class="nav-links">
+        <i class="fa-solid fa-clock"></i> Log Aktivitas</a>
+      <a href="inventory.html" class="nav-links">
+        <i class="fa-solid fa-box"></i> Inventory barang</a>
+      <a href="persuratan.html" class="nav-links">
+        <i class="fa-solid fa-envelope"></i> Persuratan</a>
+      <!--
+      <a href="buku_tamu.html" class="nav-links">
+        <i class="fa-solid fa-book"></i> Buku tamu</a>
+      <a href="peminjaman.html" class="nav-links">
+        <i class="fa-solid fa-door-open"></i> Peminjaman Ruangan</a>
+        -->
+    </div>
+    <div>
+      <a href="profile.html" class="nav-links"><i class="fa-solid fa-user"></i> My Profile</a>
+      <a href="#" id="logoutLink" class="nav-links"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="profile-section">
+        <h2 style="margin-bottom: -20px;">Edit Barang Inventaris</h2>
+      </div>
+    </div>
+    <div class="container-fluid py-4" id="formContainer">
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4" >
+            <div class="card-body px-4 pt-0 pb-4" style="margin-top: 20px;">
+              <form id="itemUpdateForm" enctype="multipart/form-data">
+                <input type="hidden" id="itemId" name="itemId">
+                <input type="hidden" id="current_foto_data" name="current_foto_data">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="nama_barang" class="form-label">Nama Barang</label>
+                    <input type="text" class="form-control" id="nama_barang" name="nama_barang" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="stok" class="form-label">Stok Barang</label>
+                    <input type="text" class="form-control" id="stok" name="stok" required>
+                  </div> 
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                      <option value="">-- Pilih Status --</option>
+                      <option value="tersedia">Tersedia</option>
+                      <option value="terpakai">Terpakai</option>
+                      <option value="rusak">Rusak</option>
+                      <option value="hilang">Hilang</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lokasi" class="form-label">Lokasi</label>
+                    <input type="text" class="form-control" id="lokasi" name="lokasi" required>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="tanggal_masuk" class="form-label">Tanggal Masuk</label>
+                    <input type="date" class="form-control" id="tanggal_masuk" name="tanggal_masuk" >
+                  </div>
+                  <div class="col-md-6">
+                    <label for="tanggal_terpakai" class="form-label">Tanggal Terpakai</label>
+                    <input type="date" class="form-control" id="tanggal_terpakai" name="tanggal_terpakai" >
+                  </div>
+                <div class="mb-3">
+                    <label class="form-label">Foto Barang Saat Ini:</label>
+                    <div id="currentFoto" class="d-flex flex-wrap align-items-center mb-2">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="foto" class="form-label">Upload Foto Baru (Opsional)</label>
+                    <input type="file" class="form-control" id="foto" name="foto[]" multiple accept="image/*">
+                    <small class="form-text text-muted">Maksimal 2MB per foto. Upload foto baru akan mengganti foto lama.</small>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-gradient-info me-2">Simpan Perubahan</button>
+                  <button type="button" class="btn btn-secondary" onclick="goBack()">Batal</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/update_item.js"></script> </body>
+</html>
