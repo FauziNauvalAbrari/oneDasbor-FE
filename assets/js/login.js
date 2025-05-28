@@ -1,6 +1,6 @@
 const form = document.getElementById('loginForm');
 const errorMessage = document.getElementById('errorMessage');
-const RECAPTCHA_SITE_KEY = '6LeWDTgrAAAAANCnhcu6D3wQs7-B9rO7djT7Eoz3';
+const RECAPTCHA_SITE_KEY = '-';
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorMessage.style.display = 'none'; 
