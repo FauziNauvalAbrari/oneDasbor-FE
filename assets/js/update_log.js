@@ -45,10 +45,10 @@ function showToast(message, type = 'info') {
       const date = new Date(isoString);
       const offset = date.getTimezoneOffset();
       const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-      return localDate.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
+      return localDate.toISOString().slice(0, 16);
     } catch (e) {
       console.error("Error formatting date for input:", isoString, e);
-      try { // Fallback format manual
+      try {
            const date = new Date(isoString);
            const pad = (n) => n.toString().padStart(2, '0');
            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -117,17 +117,16 @@ function showToast(message, type = 'info') {
       setInputValue("status", data.status);
       setInputValue("lokasi_kerja", data.lokasi_kerja);
       setInputValue("lokasi", data.lokasi);
-      setInputValue("waktu_kejadian", formatDateTimeForInput(data.waktu_kejadian)); // Format diperbaiki
+      setInputValue("waktu_kejadian", formatDateTimeForInput(data.waktu_kejadian));
       setInputValue("pic", data.pic);
       setInputValue("keterangan", data.keterangan);
   
-      // Simpan evidens lama (sebagai string JSON) di hidden input
       const currentEvidenceDataInput = form.querySelector('#current_eviden_data');
       let evidenceToStore = '[]';
        if (data.eviden) {
             if (typeof data.eviden === 'string') {
                  try { JSON.parse(data.eviden); evidenceToStore = data.eviden; }
-                 catch(e) { evidenceToStore = JSON.stringify([data.eviden]); } // Anggap path tunggal jika string non-json
+                 catch(e) { evidenceToStore = JSON.stringify([data.eviden]); }
             } else if (Array.isArray(data.eviden)) {
                  evidenceToStore = JSON.stringify(data.eviden);
             }
@@ -135,7 +134,6 @@ function showToast(message, type = 'info') {
       if (currentEvidenceDataInput) { currentEvidenceDataInput.value = evidenceToStore; }
       else { console.warn("Hidden input #current_eviden_data tidak ditemukan."); }
   
-      // Tampilkan preview evidens lama
       const currentEvidenceContainer = document.getElementById("currentEvidence");
       if (currentEvidenceContainer) {
         currentEvidenceContainer.innerHTML = '';
@@ -191,35 +189,27 @@ function showToast(message, type = 'info') {
     const formData = new FormData();
     formData.append('_method', 'PUT');
 
-    // Append field lain seperti sebelumnya
     const fieldsToAppend = ["logId", "jenis", "keterangan", "lokasi_kerja", "lokasi", "status", "pic"];
     fieldsToAppend.forEach(fieldId => {
         const element = form.querySelector(`#${fieldId}`);
         if (element) {
             formData.append(fieldId, element.value);
         } else if (fieldId === 'logId') {
-            formData.append(fieldId, id); // Fallback
+            formData.append(fieldId, id);
         }
     });
 
-    // --- PERBAIKAN FORMAT WAKTU KEJADIAN ---
     const waktuKejadianInput = form.querySelector('#waktu_kejadian');
     if (waktuKejadianInput && waktuKejadianInput.value) {
-        // Ambil nilai dari input (misal: "2025-05-06T11:30")
         const rawValue = waktuKejadianInput.value;
-        // Ubah format ke "YYYY-MM-DD HH:MM:SS"
-        const formattedValue = rawValue.replace('T', ' ') + ':00'; // Ganti T dengan spasi, tambah detik :00
+        const formattedValue = rawValue.replace('T', ' ') + ':00';
 
-        formData.append("waktu_kejadian", formattedValue); // Kirim format yang sudah benar
+        formData.append("waktu_kejadian", formattedValue);
         console.log("Mengirim waktu_kejadian (formatted):", formattedValue);
     } else {
         console.warn("Input #waktu_kejadian tidak ditemukan atau kosong.");
-        // Kirim string kosong jika backend mengizinkan null/kosong
-        // formData.append("waktu_kejadian", "");
     }
-    // --- AKHIR PERBAIKAN ---
 
-    // Handle evidens (logika Anda sebelumnya)
     const fileInput = form.querySelector('#eviden');
     const files = fileInput ? fileInput.files : null;
     const fileNames = [];
@@ -241,38 +231,33 @@ function showToast(message, type = 'info') {
 
     const apiUrl = `http://127.0.0.1:8000/api/logaktivitas/${id}`;
 
-    // Fetch API (sama seperti sebelumnya)
     fetch(apiUrl, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', },
         body: formData
     })
-    .then(async response => { /* ... .then response ... */
+    .then(async response => {
          if (response.ok) return response.json();
-         // Handle error (sama seperti sebelumnya)
          const errorData = await response.json().catch(() => ({ message: "Respons error tidak valid." }));
          let errorMessage = errorData.message || `Gagal menyimpan (Status: ${response.status}).`;
          if (response.status === 422 && errorData.errors) {
              errorMessage = "Kesalahan input:";
-             // --- Perbaiki cara menampilkan error validasi ---
              Object.keys(errorData.errors).forEach(field => {
                  errorMessage += `\n- ${field}: ${errorData.errors[field].join(', ')}`;
              });
-             // --- Akhir perbaikan error validasi ---
          }
          const error = new Error(errorMessage);
          error.status = response.status;
          error.data = errorData;
          throw error;
     })
-    .then(data => { /* ... .then success ... */
+    .then(data => {
         console.log("Update sukses:", data);
         showToast(data.message || "Data berhasil diperbarui.", 'success');
         setTimeout(() => { window.location.href = `log_aktivitas.html`; }, 1500);
     })
-    .catch(error => { /* ... .catch ... */
+    .catch(error => {
         console.error("Error saat update:", error);
-        // Tampilkan pesan error yang sudah diformat dari blok .then sebelumnya
         showToast(error.message || "Gagal menyimpan data.", 'danger');
         if (submitButton) {
             submitButton.disabled = false;
@@ -280,7 +265,6 @@ function showToast(message, type = 'info') {
         }
     });
 }
-  // --- Inisialisasi Halaman ---
   
   document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('access_token');
@@ -301,7 +285,6 @@ function showToast(message, type = 'info') {
       return;
     }
   
-    // Dinamis tambahkan hidden input jika tidak ada di HTML
     if (!form.querySelector('#current_eviden_data')) {
       const hiddenInput = document.createElement('input');
       hiddenInput.type = 'hidden';
@@ -316,20 +299,17 @@ function showToast(message, type = 'info') {
       return;
     }
   
-    // Panggil fetch data awal
     fetchAndPopulateForm(id, token, form);
   
-    // Tambahkan listener submit
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       handleUpdateSubmit(id, token, form);
     });
   
-    // Tambahkan listener logout
     if (logoutLink) {
       logoutLink.addEventListener('click', (event) => {
         event.preventDefault();
-        localStorage.clear(); // Cara simpel hapus semua
+        localStorage.clear();
         showToast('Logout berhasil.', 'success');
         setTimeout(() => { window.location.href = 'login.html'; }, 1000);
       });

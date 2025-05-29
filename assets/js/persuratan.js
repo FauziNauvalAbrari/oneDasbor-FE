@@ -126,7 +126,7 @@ function getStatusBadgeSuratHtml(status) {
         'diajukan': { class: 'bg-gradient-info text-white', text: 'DIAJUKAN' },
         'disetujui': { class: 'bg-gradient-success text-white', text: 'DISETUJUI' },
         'ditolak': { class: 'bg-gradient-danger text-white', text: 'DITOLAK' },
-        'selesai': { class: 'bg-gradient-primary text-white', text: 'SELESAI' },
+        'selesai': { class: 'bg-gradient-faded-success text-white', text: 'SELESAI' },
         'diperbaiki': { class: 'bg-gradient-secondary text-white', text: 'PERLU DIPERBAIKI' }
     };
     const currentStatus = statusMap[status] || { class: 'bg-gradient-dark text-white', text: status.toUpperCase() };
@@ -175,8 +175,7 @@ function displaySuratItems(dataToDisplay) {
         row.innerHTML = `
             <td class="text-center align-middle">${start + index + 1}.</td>
             <td class="align-middle">${surat.no_surat || '-'}</td>
-            <td class="align-middle">${surat.dari || '-'}</td>
-            <td class="align-middle">${surat.kepada || '-'}</td>
+            <td class="align-middle">${truncateText(surat.dari, 12) || '-'}</td>
             <td>${truncateText(surat.perihal, 15) || '-'}</td>
             <td class="text-center align-middle">${formatDateOnlySurat(surat.tanggal_masuk)}</td>
             <td class="text-center align-middle">${getStatusBadgeSuratHtml(surat.status)}</td>

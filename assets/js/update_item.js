@@ -1,9 +1,5 @@
-// assets/js/update_item.js
-
-// --- Global Constants ---
 const API_BASE_URL_INVENTORY = 'http://127.0.0.1:8000/api/inventory';
 
-// --- Utility Functions ---
 function showToast(message, type = 'info') {
     let toastContainer = document.querySelector('.toast-container.position-fixed.top-0.end-0');
     if (!toastContainer) {
@@ -44,12 +40,10 @@ function showToast(message, type = 'info') {
     toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
 }
 
-// Fungsi untuk format tanggal dari ISO string ke YYYY-MM-DD (untuk input type="date")
 function formatDateForInput(isoString) {
     if (!isoString) return '';
     try {
-        // Hanya ambil bagian tanggal
-        return isoString.split('T')[0]; // Ambil YYYY-MM-DD dari YYYY-MM-DDTHH:mm:ssZ
+        return isoString.split('T')[0];
     } catch (e) {
         console.error("Error formatting date for input:", isoString, e);
         return '';
@@ -72,7 +66,6 @@ function closeSidebar() {
     if (sidebar) sidebar.classList.remove("active");
 }
 
-// --- Fetch and Populate Form (for Inventory) ---
 async function fetchAndPopulateForm(id, token, form) {
     console.log(`Mengambil data inventaris ID: ${id}`);
     const apiUrl = `${API_BASE_URL_INVENTORY}/${id}`;
@@ -105,8 +98,7 @@ async function fetchAndPopulateForm(id, token, form) {
             else { console.warn(`Elemen #${elementId} tidak ditemukan.`); }
         };
         
-        // Populate inventory specific fields
-        setInputValue("itemId", data.id); // Hidden ID for the item
+        setInputValue("itemId", data.id);
         setInputValue("kode_barang", data.kode_barang);
         setInputValue("nama_barang", data.nama_barang);
         setInputValue("stok", data.stok);
@@ -115,13 +107,12 @@ async function fetchAndPopulateForm(id, token, form) {
         setInputValue("tanggal_masuk", formatDateForInput(data.tanggal_masuk));
         setInputValue("tanggal_terpakai", formatDateForInput(data.tanggal_terpakai));
 
-        // Simpan foto lama (sebagai string JSON) di hidden input
         const currentFotoDataInput = form.querySelector('#current_foto_data');
         let fotoToStore = '[]';
         if (data.foto) {
             if (typeof data.foto === 'string') {
                 try { JSON.parse(data.foto); fotoToStore = data.foto; }
-                catch(e) { fotoToStore = JSON.stringify([data.foto]); } // Assume single path if non-json string
+                catch(e) { fotoToStore = JSON.stringify([data.foto]); }
             } else if (Array.isArray(data.foto)) {
                 fotoToStore = JSON.stringify(data.foto);
             }
@@ -129,7 +120,6 @@ async function fetchAndPopulateForm(id, token, form) {
         if (currentFotoDataInput) { currentFotoDataInput.value = fotoToStore; }
         else { console.warn("Hidden input #current_foto_data tidak ditemukan."); }
 
-        // Tampilkan preview foto lama
         const currentFotoContainer = document.getElementById("currentFoto");
         if (currentFotoContainer) {
             currentFotoContainer.innerHTML = '';
@@ -163,7 +153,6 @@ async function fetchAndPopulateForm(id, token, form) {
 
         if (submitButton) submitButton.disabled = false;
 
-        // Panggil fungsi untuk mengelola status tanggal_terpakai setelah form terisi
         manageTanggalTerpakaiStatus();
 
     } catch (error) {
@@ -176,7 +165,6 @@ async function fetchAndPopulateForm(id, token, form) {
     }
 }
 
-// --- Handle Update Submit (for Inventory) ---
 async function handleUpdateSubmit(id, token, form) {
     console.log(`Menyimpan perubahan inventaris ID: ${id}`);
     const submitButton = form.querySelector('button[type="submit"]');
@@ -187,9 +175,8 @@ async function handleUpdateSubmit(id, token, form) {
     }
 
     const formData = new FormData();
-    formData.append('_method', 'PUT'); // Penting untuk update di Laravel RESTful API
+    formData.append('_method', 'PUT');
 
-    // Pastikan user_id juga dikirim
     const userId = localStorage.getItem("user_id");
     if (userId) {
         formData.append("user_id", userId);
@@ -200,7 +187,6 @@ async function handleUpdateSubmit(id, token, form) {
         return;
     }
 
-    // Append inventory specific fields
     const fieldsToAppend = ["kode_barang", "nama_barang", "stok", "lokasi"];
     fieldsToAppend.forEach(fieldId => {
         const element = form.querySelector(`#${fieldId}`);
@@ -209,50 +195,45 @@ async function handleUpdateSubmit(id, token, form) {
         }
     });
 
-    // Tanggal Masuk
     const tanggalMasukInput = form.querySelector('#tanggal_masuk');
     if (tanggalMasukInput && tanggalMasukInput.value) {
         formData.append("tanggal_masuk", tanggalMasukInput.value);
     } else {
-        formData.append("tanggal_masuk", ''); // Kirim string kosong jika tidak ada nilai
+        formData.append("tanggal_masuk", '');
     }
 
-    // Tanggal Terpakai: Hanya tambahkan jika status BUKAN 'tersedia' dan ada nilainya
     const statusSelect = form.querySelector('#status');
     const tanggalTerpakaiInput = form.querySelector('#tanggal_terpakai');
     if (statusSelect && statusSelect.value !== 'tersedia' && tanggalTerpakaiInput && tanggalTerpakaiInput.value) {
         formData.append("tanggal_terpakai", tanggalTerpakaiInput.value);
     } else {
-        formData.append("tanggal_terpakai", ''); // Mengirim string kosong/null jika status 'tersedia'
+        formData.append("tanggal_terpakai", '');
     }
-    // Append status
     if (statusSelect) {
         formData.append("status", statusSelect.value);
     }
 
-    // Handle new photo uploads
-    const fileInput = form.querySelector('#foto'); // ID for new foto input
+    const fileInput = form.querySelector('#foto');
     const files = fileInput ? fileInput.files : null;
 
     if (files && files.length > 0) {
         console.log(`File baru terdeteksi: ${files.length}`);
         for (const file of files) {
-            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+            if (file.size > 2 * 1024 * 1024) {
                 showToast(`Ukuran foto '${file.name}' (${(file.size / (1024 * 1024)).toFixed(2)} MB) melebihi batas 2MB.`, 'warning');
                 if (submitButton) { submitButton.disabled = false; submitButton.innerHTML = originalButtonText; }
                 return;
             }
-            formData.append("foto[]", file); // Nama field harus sesuai dengan API (e.g., 'foto[]')
+            formData.append("foto[]", file);
         }
     } else {
         console.log("Tidak ada file baru. Mengirim info foto lama.");
         const currentFotoDataInput = form.querySelector('#current_foto_data');
         if (currentFotoDataInput && currentFotoDataInput.value && currentFotoDataInput.value !== '[]') {
-            formData.append("current_foto", currentFotoDataInput.value); // Kirim data foto lama jika tidak ada upload baru
+            formData.append("current_foto", currentFotoDataInput.value);
         }
     }
     
-    // Add updated_at timestamp
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
     formData.append("updated_at", now);
 
@@ -260,7 +241,7 @@ async function handleUpdateSubmit(id, token, form) {
 
     try {
         const response = await fetch(apiUrl, {
-            method: 'POST', // Menggunakan POST karena _method=PUT
+            method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
             body: formData
         });
@@ -292,23 +273,21 @@ async function handleUpdateSubmit(id, token, form) {
     }
 }
 
-// --- Function to manage tanggal_terpakai input state ---
 function manageTanggalTerpakaiStatus() {
     const statusSelect = document.getElementById('status');
     const tanggalTerpakaiInput = document.getElementById('tanggal_terpakai');
     if (statusSelect && tanggalTerpakaiInput) {
         if (statusSelect.value === 'tersedia') {
-            tanggalTerpakaiInput.value = ''; // Kosongkan nilai
-            tanggalTerpakaiInput.disabled = true; // Nonaktifkan input
-            tanggalTerpakaiInput.placeholder = 'Tidak berlaku untuk status tersedia'; // Tambahkan placeholder
+            tanggalTerpakaiInput.value = '';
+            tanggalTerpakaiInput.disabled = true;
+            tanggalTerpakaiInput.placeholder = 'Tidak berlaku untuk status tersedia';
         } else {
-            tanggalTerpakaiInput.disabled = false; // Aktifkan kembali input
-            tanggalTerpakaiInput.placeholder = ''; // Hapus placeholder
+            tanggalTerpakaiInput.disabled = false;
+            tanggalTerpakaiInput.placeholder = '';
         }
     }
 }
 
-// --- Page Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -317,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const form = document.getElementById('itemUpdateForm'); // Ubah ID form
+    const form = document.getElementById('itemUpdateForm');
     const logoutLink = document.getElementById('logoutLink');
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
@@ -328,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Dinamis tambahkan hidden input untuk foto lama jika tidak ada di HTML
     if (!form.querySelector('#current_foto_data')) {
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
@@ -336,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         form.appendChild(hiddenInput);
     }
     
-    // Get status select and tanggal_terpakai input for the event listener
     const statusSelect = document.getElementById('status');
     if (statusSelect) {
         statusSelect.addEventListener('change', manageTanggalTerpakaiStatus);
@@ -348,16 +325,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Panggil fetch data awal
     fetchAndPopulateForm(id, token, form);
 
-    // Tambahkan listener submit
     form.addEventListener('submit', (event) => {
         event.preventDefault();
         handleUpdateSubmit(id, token, form);
     });
 
-    // Tambahkan listener logout
     if (logoutLink) {
         logoutLink.addEventListener('click', (event) => {
             event.preventDefault();
@@ -368,7 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Expose functions to global scope for HTML onclick attributes
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
 window.goBack = goBack;

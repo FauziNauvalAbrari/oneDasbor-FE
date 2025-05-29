@@ -33,6 +33,12 @@
                 <i class="fa-solid fa-box"></i> Inventory barang</a>
             <a href="persuratan.html" class="nav-links">
                 <i class="fa-solid fa-envelope"></i> Persuratan</a>
+                <!--
+            <a href="buku_tamu.html" class="nav-links">
+                <i class="fa-solid fa-book"></i> Buku tamu</a>
+            <a href="peminjaman.html" class="nav-links">
+                <i class="fa-solid fa-door-open"></i> Peminjaman Ruangan</a>
+                -->
         </div>
         <div>
             <a href="profile.html" class="nav-links"><i class="fa-solid fa-user"></i> My Profile</a>
@@ -52,44 +58,70 @@
                     <div class="card mb-4">
                         <div class="card-body px-4 pt-0 pb-4" style="margin-top: 20px;">
                             <form id="suratUpdateForm" enctype="multipart/form-data">
-                                <input type="hidden" id="suratId" name="suratId">
-                                <input type="hidden" id="current_file_data" name="current_file_data">
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="no_surat" class="form-label">Nomor Surat</label>
-                                        <input type="text" class="form-control" id="no_surat" name="nomor_surat" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="tanggal_masuk" class="form-label">Tanggal Surat</label>
-                                        <input type="date" class="form-control" id="tanggal_masuk" name="tanggal_masuk" required>
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
+                                    <input type="hidden" id="suratId" name="suratId">
+                                    <input type="hidden" id="no_surat" name="no_surat">
                                     <div class="col-md-6">
                                         <label for="dari" class="form-label">Pengirim</label>
                                         <input type="text" class="form-control" id="dari" name="dari" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="kepada" class="form-label">Penerima</label>
+                                        <label for="kepada" class="form-label">Kepada</label>
                                         <input type="text" class="form-control" id="kepada" name="kepada" required>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="perihal" class="form-label">Perihal</label>
-                                    <input type="text" class="form-control" id="perihal" name="perihal" required>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="jenis_surat" class="form-label">Jenis Surat</label>
+                                        <select class="form-select" id="jenis_surat" name="jenis_surat" required>
+                                            <option value="">-- Pilih Jenis Surat --</option>
+                                            <option value="SK">Surat Keputusan</option>
+                                            <option value="ND">Nota Dinas</option>
+                                            <option value="UD">Undangan</option>
+                                            <option value="SM">Surat Masuk</option>
+                                            <option value="SP">Surat Peringatan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select class="form-select" id="status" name="status" required>
+                                            <option value="">-- Pilih Jenis Surat --</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="diajukan">Diajukan</option>
+                                            <option value="ditolak">Ditolak</option>
+                                            <option value="selesai">Selesai</option>
+                                            <option value="diperbaiki">Diperbaiki</option>
+                                            <option value="disetujui">Disetujui</option>    
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">File Surat Saat Ini:</label>
-                                    <div id="currentFile" class="d-flex flex-wrap align-items-center mb-2">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="perihal" class="form-label">Perihal</label>
+                                        <input type="text" class="form-control" id="perihal" name="perihal" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="tanggal_masuk" class="form-label">Tanggal Masuk</label>
+                                        <input type="date" class="form-control" id="tanggal_masuk" name="tanggal_masuk" required>
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="file_surat" class="form-label">Upload File Surat Baru (Opsional)</label>
-                                    <input type="file" class="form-control" id="file_surat" name="file_surat" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">Maksimal 10MB. Upload file baru akan mengganti file lama.</small>
+                                    <label for="catatan" class="form-label">Catatan</label>
+                                    <textarea class="form-control" id="catatan" name="catatan" rows="1" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">File Lampiran Saat Ini:</label>
+                                    <div id="currentFilePreview" class="mt-2">
+                                        <p class="text-muted fst-italic">Memuat file...</p>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="file_lampiran_input" class="form-label">Unggah File Lampiran Baru (Opsional)</label>
+                                    <input type="file" class="form-control" id="file_lampiran_input" name="file_lampiran_input[]" multiple>
+                                    <small class="form-text text-muted">Jika Anda mengunggah file baru, file lama mungkin akan diganti (tergantung logika backend).</small>
                                 </div>
                                 <div class="d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-gradient-info me-2">Simpan Perubahan</button>
+                                    <button type="submit" class="btn btn-gradient-info me-2">Simpan</button>
                                     <button type="button" class="btn btn-secondary" onclick="goBack()">Batal</button>
                                 </div>
                             </form>

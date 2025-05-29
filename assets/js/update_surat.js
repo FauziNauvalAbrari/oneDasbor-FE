@@ -1,12 +1,5 @@
-/**
- * update_surat.js
- * Mirip dengan update_item.js, tetapi untuk entitas "surat".
- */
-
-// --- Global Constants ---
 const API_BASE_URL_SURAT = 'http://127.0.0.1:8000/api/persuratan';
 
-// --- Utility Functions ---
 function showToast(message, type = 'info') {
     let toastContainer = document.querySelector('.toast-container.position-fixed.top-0.end-0');
     if (!toastContainer) {
@@ -47,7 +40,6 @@ function showToast(message, type = 'info') {
     toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
 }
 
-// Format tanggal ISO ke YYYY-MM-DD
 function formatDateForInput(isoString) {
     if (!isoString) return '';
     try {
@@ -74,7 +66,6 @@ function closeSidebar() {
     if (sidebar) sidebar.classList.remove("active");
 }
 
-// --- Fetch and Populate Form (for Surat) ---
 async function fetchAndPopulateFormSurat(id, token, form) {
     console.log(`Mengambil data surat ID: ${id}`);
     const apiUrl = `${API_BASE_URL_SURAT}/${id}`;
@@ -90,6 +81,7 @@ async function fetchAndPopulateFormSurat(id, token, form) {
         if (response.status === 401) {
             showToast('Sesi tidak valid. Silakan login ulang.', 'danger');
             localStorage.removeItem('access_token');
+            localStorage.removeItem('user_id');
             setTimeout(() => { window.location.href = 'login.html'; }, 2500);
             throw new Error('Unauthorized');
         }
@@ -98,63 +90,79 @@ async function fetchAndPopulateFormSurat(id, token, form) {
             const errorBody = await response.json().catch(() => ({}));
             throw new Error(errorBody.message || `Gagal memuat data (Status: ${response.status})`);
         }
-        const data = await response.json();
-        console.log("Data surat diterima:", data);
+        
+        let suratData = await response.json();
+        if (suratData.data && typeof suratData.data === 'object') {
+             suratData = suratData.data;
+        }
+        console.log("Data surat diterima:", suratData);
 
         const setInputValue = (elementId, value) => {
             const el = form.querySelector(`#${elementId}`);
-            if (el) { el.value = value ?? ''; }
-            else { console.warn(`Elemen #${elementId} tidak ditemukan.`); }
+            if (el) {
+                el.value = value !== null && value !== undefined ? value : '';
+            } else {
+                console.warn(`Elemen #${elementId} tidak ditemukan di form.`);
+            }
         };
 
-        // Populate surat specific fields
-        setInputValue("suratId", data.id); // Hidden ID for surat
-        setInputValue("no_surat", data.no_surat);
-        setInputValue("tanggal_masuk", formatDateForInput(data.tanggal_masuk));
-        setInputValue("dari", data.dari);
-        setInputValue("kepada", data.kepada);
-        setInputValue("perihal", data.perihal);
-        setInputValue("catatan", data.catatan);
+        setInputValue("suratId", suratData.id);
+        setInputValue("no_surat", suratData.no_surat);
+        setInputValue("tanggal_masuk", formatDateForInput(suratData.tanggal_masuk));
+        setInputValue("dari", suratData.dari);
+        setInputValue("kepada", suratData.kepada);
+        setInputValue("perihal", suratData.perihal);
+        setInputValue("catatan", suratData.catatan);
+        setInputValue("jenis_surat", suratData.jenis_surat);
+        setInputValue("status", suratData.status);
 
-        // Simpan file lama (sebagai string JSON) di hidden input
         const currentFileDataInput = form.querySelector('#current_file_data');
         let fileToStore = '[]';
-        if (data.file) {
-            if (typeof data.file === 'string') {
-                try { JSON.parse(data.file); fileToStore = data.file; }
-                catch(e) { fileToStore = JSON.stringify([data.file]); }
-            } else if (Array.isArray(data.file)) {
-                fileToStore = JSON.stringify(data.file);
+
+        if (suratData.file_lampiran) {
+            if (typeof suratData.file_lampiran === 'string') {
+                try {
+                    JSON.parse(suratData.file_lampiran);
+                    fileToStore = suratData.file_lampiran;
+                } catch (e) {
+                    fileToStore = JSON.stringify([suratData.file_lampiran]);
+                }
+            } else if (Array.isArray(suratData.file_lampiran)) {
+                fileToStore = JSON.stringify(suratData.file_lampiran);
             }
         }
         if (currentFileDataInput) { currentFileDataInput.value = fileToStore; }
         else { console.warn("Hidden input #current_file_data tidak ditemukan."); }
 
-        // Tampilkan preview file lama
-        const currentFileContainer = document.getElementById("currentFile");
+        const currentFileContainer = document.getElementById("currentFilePreview");
         if (currentFileContainer) {
             currentFileContainer.innerHTML = '';
             try {
                 const fileList = JSON.parse(fileToStore);
                 if (Array.isArray(fileList) && fileList.length > 0) {
-                    fileList.forEach(src => {
-                        if (typeof src === 'string' && src.trim()) {
-                            let filePath = src.replace(/\\/g, '/').replace(/^surat\/?/i, '');
-                            const fileUrl = `http://127.0.0.1:8000/storage/surat/${filePath}`;
+                    fileList.forEach(filePath => {
+                        if (typeof filePath === 'string' && filePath.trim()) {
+                            const fileName = filePath.split('/').pop();
+                            const fileUrl = `http://127.0.0.1:8000/storage/${filePath}`; 
+                            
                             const fileLink = document.createElement('a');
-                            fileLink.href = fileUrl; fileLink.target = '_blank';
-                            fileLink.className = 'd-inline-block me-2 mb-2 border rounded p-1';
-                            fileLink.innerText = filePath.split('/').pop();
+                            fileLink.href = fileUrl;
+                            fileLink.target = '_blank';
+                            
+                            fileLink.className = 'btn btn-sm btn-success text-white btn-sm me-2 mb-2 text-decoration-none'; 
+                            fileLink.innerHTML = `<i class="fas fa-file-alt me-1"></i> ${fileName}`;
                             currentFileContainer.appendChild(fileLink);
                         }
                     });
                 } else {
-                    currentFileContainer.innerHTML = '<p class="text-muted fst-italic">Tidak ada file.</p>';
+                    currentFileContainer.innerHTML = '<p class="text-muted fst-italic">Tidak ada file lampiran.</p>';
                 }
             } catch (e) {
                 console.error("Error proses preview file:", e);
-                currentFileContainer.innerHTML = '<p class="text-danger"><em>Gagal memuat preview.</em></p>';
+                currentFileContainer.innerHTML = '<p class="text-danger"><em>Gagal memuat preview file.</em></p>';
             }
+        } else {
+             console.warn("Elemen #currentFilePreview untuk menampilkan file lama tidak ditemukan.");
         }
 
         if (submitButton) submitButton.disabled = false;
@@ -162,18 +170,17 @@ async function fetchAndPopulateFormSurat(id, token, form) {
     } catch (error) {
         console.error("Error fetch/populate:", error);
         if (error.message !== 'Unauthorized') {
-            showToast(error.message || "Gagal memuat data.", 'danger');
-            if (form) form.innerHTML = `<div class="alert alert-danger p-4">${error.message || "Gagal memuat data."}</div>`;
+            showToast(error.message || "Gagal memuat data surat.", 'danger');
+            if (form) form.innerHTML = `<div class="alert alert-danger p-4 text-center">${error.message || "Gagal memuat data surat."} <br> <a href="persuratan.html">Kembali ke Daftar Surat</a></div>`;
         }
         if (submitButton) submitButton.disabled = true;
     }
 }
 
-// --- Handle Update Submit (for Surat) ---
 async function handleUpdateSubmitSurat(id, token, form) {
     console.log(`Menyimpan perubahan surat ID: ${id}`);
     const submitButton = form.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton ? submitButton.innerHTML : 'Simpan';
+    const originalButtonText = submitButton ? submitButton.innerHTML : 'Simpan Perubahan';
     if (submitButton) {
         submitButton.disabled = true;
         submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Menyimpan...`;
@@ -182,59 +189,53 @@ async function handleUpdateSubmitSurat(id, token, form) {
     const formData = new FormData();
     formData.append('_method', 'PUT');
 
-    // Pastikan user_id juga dikirim
     const userId = localStorage.getItem("user_id");
     if (userId) {
         formData.append("user_id", userId);
     } else {
-        showToast('ID pengguna tidak ditemukan. Silakan login ulang.', 'danger');
-        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+        showToast('ID pengguna tidak ditemukan. Sesi mungkin berakhir, silakan login ulang.', 'danger');
         if (submitButton) { submitButton.disabled = false; submitButton.innerHTML = originalButtonText; }
         return;
     }
 
-    // Append surat specific fields
-    const fieldsToAppend = ["nomor_surat", "pengirim", "penerima", "perihal", "keterangan"];
-    fieldsToAppend.forEach(fieldId => {
-        const element = form.querySelector(`#${fieldId}`);
+    const fieldsToGet = {
+        "suratId": "suratId",
+        "no_surat": "no_surat",
+        "tanggal_masuk": "tanggal_masuk",
+        "dari": "dari",
+        "kepada": "kepada",
+        "perihal": "perihal",
+        "catatan": "catatan",
+        "jenis_surat": "jenis_surat",
+        "status": "status"
+    };
+
+    for (const htmlId in fieldsToGet) {
+        const backendFieldName = fieldsToGet[htmlId];
+        const element = form.querySelector(`#${htmlId}`);
         if (element) {
-            formData.append(fieldId, element.value);
+            formData.append(backendFieldName, element.value);
+        } else {
+            console.warn(`Elemen #${htmlId} untuk field '${backendFieldName}' tidak ditemukan saat submit.`);
         }
-    });
-
-    // Tanggal Surat
-    const tanggalSuratInput = form.querySelector('#tanggal_surat');
-    if (tanggalSuratInput && tanggalSuratInput.value) {
-        formData.append("tanggal_surat", tanggalSuratInput.value);
-    } else {
-        formData.append("tanggal_surat", '');
     }
-
-    // Handle new file uploads
-    const fileInput = form.querySelector('#file'); // ID for new file input
-    const files = fileInput ? fileInput.files : null;
+    
+    const newFileInput = form.querySelector('#file_lampiran_input');
+    const files = newFileInput ? newFileInput.files : null;
 
     if (files && files.length > 0) {
         console.log(`File baru terdeteksi: ${files.length}`);
         for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                showToast(`Ukuran file '${file.name}' (${(file.size / (1024 * 1024)).toFixed(2)} MB) melebihi batas 5MB.`, 'warning');
+            if (file.size > 10 * 1024 * 1024) {
+                showToast(`Ukuran file '${file.name}' (${(file.size / (1024 * 1024)).toFixed(2)} MB) melebihi batas.`, 'warning');
                 if (submitButton) { submitButton.disabled = false; submitButton.innerHTML = originalButtonText; }
                 return;
             }
-            formData.append("file[]", file);
+            formData.append("file_lampiran[]", file, file.name);
         }
     } else {
-        console.log("Tidak ada file baru. Mengirim info file lama.");
-        const currentFileDataInput = form.querySelector('#current_file_data');
-        if (currentFileDataInput && currentFileDataInput.value && currentFileDataInput.value !== '[]') {
-            formData.append("current_file", currentFileDataInput.value);
-        }
+        console.log("Tidak ada file baru diunggah. Mempertahankan file lama jika ada.");
     }
-
-    // Add updated_at timestamp
-    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
-    formData.append("updated_at", now);
 
     const apiUrl = `${API_BASE_URL_SURAT}/${id}`;
 
@@ -245,25 +246,25 @@ async function handleUpdateSubmitSurat(id, token, form) {
             body: formData
         });
 
+        const result = await response.json().catch(() => ({ message: "Respons error tidak valid dari server." }));
+
         if (response.ok) {
-            const data = await response.json();
-            console.log("Update sukses:", data);
-            showToast(data.message || "Data surat berhasil diperbarui.", 'success');
-            setTimeout(() => { window.location.href = `surat.html`; }, 1500);
+            console.log("Update sukses:", result);
+            showToast(result.message || "Data surat berhasil diperbarui.", 'success');
+            setTimeout(() => { window.location.href = `persuratan.html`; }, 1500);
         } else {
-            const errorData = await response.json().catch(() => ({ message: "Respons error tidak valid." }));
-            let errorMessage = errorData.message || `Gagal menyimpan (Status: ${response.status}).`;
-            if (response.status === 422 && errorData.errors) {
-                errorMessage = "Kesalahan input:<br>";
-                Object.keys(errorData.errors).forEach(field => {
-                    errorMessage += `- ${field}: ${errorData.errors[field].join(', ')}<br>`;
+            let errorMessage = result.message || `Gagal menyimpan data (Status: ${response.status}).`;
+            if (response.status === 422 && result.errors) {
+                errorMessage = "Terdapat kesalahan input:<br>";
+                Object.keys(result.errors).forEach(field => {
+                    errorMessage += `- ${field}: ${result.errors[field].join(', ')}<br>`;
                 });
             }
             throw new Error(errorMessage);
         }
     } catch (error) {
         console.error("Error saat update:", error);
-        showToast(error.message || "Gagal menyimpan data.", 'danger');
+        showToast(error.message || "Gagal menyimpan perubahan data surat.", 'danger');
     } finally {
         if (submitButton) {
             submitButton.disabled = false;
@@ -272,11 +273,10 @@ async function handleUpdateSubmitSurat(id, token, form) {
     }
 }
 
-// --- Page Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('access_token');
     if (!token) {
-        showToast('Anda harus login.', 'danger');
+        showToast('Anda harus login untuk mengakses halaman ini.', 'danger');
         setTimeout(() => { window.location.href = 'login.html'; }, 2500);
         return;
     }
@@ -288,34 +288,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!form) {
         console.error("Form #suratUpdateForm tidak ditemukan!");
-        document.body.innerHTML = '<div class="alert alert-danger m-5">Error: Form update tidak ditemukan.</div>';
+        showToast("Error Kritis: Form update tidak ditemukan.", "danger");
+        const mainContent = document.querySelector('.main-content, .main, .container-fluid');
+        if(mainContent) mainContent.innerHTML = '<div class="alert alert-danger m-5 text-center">Error: Form update tidak dapat dimuat. <br> <a href="persuratan.html">Kembali ke Daftar Surat</a></div>';
         return;
     }
 
-    // Dinamis tambahkan hidden input untuk file lama jika tidak ada di HTML
     if (!form.querySelector('#current_file_data')) {
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
         hiddenInput.id = 'current_file_data';
         form.appendChild(hiddenInput);
+        console.log("Hidden input #current_file_data telah ditambahkan ke form.");
     }
 
     if (!id) {
-        showToast("ID surat tidak ditemukan di URL.", "warning");
-        form.innerHTML = '<div class="alert alert-warning p-4">ID surat tidak valid.</div>';
+        showToast("ID surat tidak ditemukan di URL. Tidak dapat memuat data.", "warning");
+        form.innerHTML = '<div class="alert alert-warning p-4 text-center">ID surat tidak valid atau tidak disertakan. <br> <a href="persuratan.html">Kembali ke Daftar Surat</a></div>';
         return;
     }
 
-    // Panggil fetch data awal
     fetchAndPopulateFormSurat(id, token, form);
 
-    // Tambahkan listener submit
     form.addEventListener('submit', (event) => {
         event.preventDefault();
         handleUpdateSubmitSurat(id, token, form);
     });
 
-    // Tambahkan listener logout
     if (logoutLink) {
         logoutLink.addEventListener('click', (event) => {
             event.preventDefault();
@@ -326,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Expose functions to global scope for HTML onclick attributes
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
 window.goBack = goBack;
