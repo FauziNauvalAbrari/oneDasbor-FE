@@ -104,6 +104,7 @@ async function fetchAndPopulateForm(id, token, form) {
         setInputValue("stok", data.stok);
         setInputValue("status", data.status);
         setInputValue("lokasi", data.lokasi);
+        setInputValue("pemilik", data.pemilik);
         setInputValue("tanggal_masuk", formatDateForInput(data.tanggal_masuk));
         setInputValue("tanggal_terpakai", formatDateForInput(data.tanggal_terpakai));
 
@@ -187,7 +188,7 @@ async function handleUpdateSubmit(id, token, form) {
         return;
     }
 
-    const fieldsToAppend = ["kode_barang", "nama_barang", "stok", "lokasi"];
+    const fieldsToAppend = ["kode_barang", "nama_barang", "stok", "lokasi", "pemilik"];
     fieldsToAppend.forEach(fieldId => {
         const element = form.querySelector(`#${fieldId}`);
         if (element) {

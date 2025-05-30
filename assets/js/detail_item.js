@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!token) {
         showToast('Anda harus login untuk mengakses halaman ini.', 'danger');
-        setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+        setTimeout(() => { window.location.href = 'login.html'; }, 2500);
         return;
     }
 
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             ['user_id', 'user_name', 'access_token', 'filter_jenis', 'filter_wilayah'].forEach(key => localStorage.removeItem(key));
             showToast("Anda telah logout.", "info");
-            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+            setTimeout(() => { window.location.href = 'login.html'; }, 1000);
         });
     }
 
@@ -113,7 +113,7 @@ async function fetchDetailInventory(id, token) {
         if (response.status === 401) {
             showToast('Sesi tidak valid. Silakan login ulang.', 'danger');
             localStorage.removeItem('access_token');
-            setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+            setTimeout(() => { window.location.href = 'login.html'; }, 2500);
             return;
         }
         if (!response.ok) {

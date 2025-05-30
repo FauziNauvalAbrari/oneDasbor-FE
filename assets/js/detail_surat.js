@@ -179,7 +179,7 @@ async function fetchDetailSurat(id, token) {
             } catch (e) { return "Tanggal Invalid"; }
         };
         
-        populateField("no_surat", data.no_surat ? `<code>${data.no_surat}</code>` : "-", true);
+        populateField("no_surat", data.no_surat ? `${data.no_surat}` : "-", true);
         populateField("dari", data.dari);
         populateField("kepada", data.kepada);
         populateField("perihal", data.perihal);

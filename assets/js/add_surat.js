@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append("jenis_surat", document.getElementById("jenis_surat").value);
                 formData.append("status", document.getElementById("status").value); // Backend mengharapkan "status"
                 formData.append("perihal", document.getElementById("perihal").value);
-                formData.append("catatan", document.getElementById("catatan").value);
 
                 if (tanggalSuratInputElement && tanggalSuratInputElement.value) {
                     formData.append("tanggal_masuk", tanggalSuratInputElement.value); // HTML id="tanggal_surat" -> backend "tanggal_masuk"

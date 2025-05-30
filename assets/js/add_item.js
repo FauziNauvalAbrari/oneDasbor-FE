@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 showToast("Anda telah logout.", "info");
 
-                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                setTimeout(() => { window.location.href = 'login.html'; }, 1000);
             });
         }
     }
